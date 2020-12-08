@@ -725,15 +725,9 @@ INPUT;
   public static function parse2($aInput) {
       foreach ($aInput as $iLine => $sLine) {
           list($operator, $value) = explode(' ', $sLine);
-          if (in_array($operator, ['jmp', 'nop'])) {
-              switch ($operator) {
-                  case 'jmp' :
-                      $operator = 'nop';
-                      break;
-                  case 'nop':
-                      $operator = 'jmp';
-                      break;
-              }
+          $aReverse   = ['jmp' => 'nop', 'nop' => 'jmp'];
+          if (in_array($operator, $aReverse)) {
+              $operator = $aReverse[$operator];
               $aSubInput = $aInput;
               $aSubInput[$iLine]    = implode(' ', [$operator, $value]);
               $iAccumulator = self::parse($aSubInput);
