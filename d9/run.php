@@ -1048,7 +1048,7 @@ INPUT;
 
   public static function test2() {
       $aInput = explode("\n", self::$sTest);
-      if (8 == (self::parse2($aInput))) {
+      if (62 == (self::parse2($aInput, 127))) {
           var_dump('OK');
       } else {
           var_dump('KO');
@@ -1057,12 +1057,11 @@ INPUT;
 
   public static function run2() {
     $aInput = explode("\n", self::$sInput);
-    var_dump(self::parse2($aInput));
+    var_dump(self::parse2($aInput, 258585477));
   }
 
   public static function parse($aInput, $iCurrent = null) {
       $iReturn = 0;
-      var_dump($aInput);
       if (is_null($iCurrent)) {
           $iCurrent = self::$iPrevious;
       }
@@ -1098,21 +1097,22 @@ INPUT;
    * @param $aInput
    * @return mixed
    */
-  public static function parse2($aInput) {
-      foreach ($aInput as $iLine => $sLine) {
-          list($operator, $value) = explode(' ', $sLine);
-          $aReverse   = ['jmp' => 'nop', 'nop' => 'jmp'];
-          if (in_array($operator, $aReverse)) {
-              $operator = $aReverse[$operator];
-              $aSubInput = $aInput;
-              $aSubInput[$iLine]    = implode(' ', [$operator, $value]);
-              $iAccumulator = self::parse($aSubInput);
-              if (self::$bFull) {
-                  var_dump('yabon !');
+  public static function parse2($aInput, $iValue) {
+      $iReturn = 0;
+      for ($i = 0 ; $i < sizeof($aInput) ; $i++) {
+          $aValues  = [$aInput[$i]];
+          for ($j = $i + 1 ; $j < sizeof($aInput) ; $j++) {
+              $aValues[]    = $aInput[$j];
+              $iSum = array_sum($aValues);
+              if ($iSum > $iValue) {
                   break;
+              }
+              if ($iSum == $iValue) {
+                  $iReturn = array_sum([min($aValues), max($aValues)]);
+                  break 2;
               }
           }
       }
-      return $iAccumulator;
+      return $iReturn;
   }
 }
