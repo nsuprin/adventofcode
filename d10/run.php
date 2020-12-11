@@ -140,6 +140,8 @@ TEST;
 39
 INPUT;
 
+  private static $count = 0;
+
   /**
    * RUN
    */
@@ -157,9 +159,34 @@ INPUT;
     }
   }
 
-  public static function test2() {
+  public static function test3() {
+     /*
+      exit();*/
+
       $aInput = explode("\n", self::$sTest);
-      if (62 == (self::parse2($aInput, 127))) {
+      if (19208 == (self::parse2($aInput))) {
+          var_dump('OK');
+      } else {
+          var_dump('KO');
+      }
+  }
+
+  public static function test2() {
+      $aInput = explode("\n", <<< TEST
+16
+10
+15
+5
+1
+11
+7
+19
+6
+12
+4
+TEST
+      );
+      if (8 == (self::parse2($aInput))) {
           var_dump('OK');
       } else {
           var_dump('KO');
@@ -168,7 +195,7 @@ INPUT;
 
   public static function run2() {
     $aInput = explode("\n", self::$sInput);
-    var_dump(self::parse2($aInput, 258585477));
+    var_dump(self::parse2($aInput));
   }
 
   public static function parse($aInput)
@@ -179,7 +206,6 @@ INPUT;
       $aInput   = array_values($aInput);
       $aDiffs = [];
       for ($i = 0; $i < sizeof($aInput) -1; $i++) {
-          var_dump($i);
           $iDiff = $aInput[$i + 1] - $aInput[$i];
           if (!isset($aDiffs[$iDiff])) {
               $aDiffs[$iDiff] = 0;
@@ -187,48 +213,86 @@ INPUT;
           $aDiffs[$iDiff]++;
       }
       $aDiffs[3]++;
-      var_dump($aDiffs);
       return $aDiffs[1] * $aDiffs[3] ;
   }
 
-  public static function check($aInput, $iCurrent) {
-      $bValid   = false;
-      $iValue   = $aInput[$iCurrent];
-      $iMin = $iCurrent - self::$iPrevious;
-      $iMax = $iCurrent - 1;
-
-      //var_dump([$iValue, $iMin, $aInput[$iMin], $iMax, $aInput[$iMax]]);
-
-      for ($i = $iMin ; $i <= $iMax ; $i++) {
-          for ($j = $iMin ; $j <= $iMax ; $j++) {
-              if ($i != $j && $iValue == $aInput[$i] + $aInput[$j]) {
-                  $bValid   = true;
-                  break 2;
-              }
-          }
-      }
-      return $bValid;
-  }
   /**
    * @param $aInput
    * @return mixed
    */
-  public static function parse2($aInput, $iValue) {
+  public static function parse2($aInput) {
+      $aInput[] = 0;
+      asort($aInput);
+      $aInput   = array_values($aInput);
+      $aPossibilies  = [];
+      $iPossibilities   = 1;
+      $aInput[sizeof($aInput)]    = 3 + $aInput[sizeof($aInput) - 1];
+      $aDiff    = [];
+      for ($iPosition = 1; $iPosition < sizeof($aInput); $iPosition++) {
+          $aDiff[] = $aInput[$iPosition] - $aInput[$iPosition - 1];
+      }
+      $sDiffs = implode('', $aDiff);
+
+      $aPows    = [5 => 14, 4 => 7, 3 => 4, 2 => 2];
+      $iCombinaisons    = 1;
+      foreach ($aPows as $i => $iPow) {
+          $sSearch = implode('', array_fill(0, $i, 1));
+          $iCombinaisons *= pow($iPow, substr_count($sDiffs, $sSearch));
+          $sDiffs   = str_replace($sSearch, '', $sDiffs);
+      }
+
+      return $iCombinaisons;
+
       $iReturn = 0;
-      for ($i = 0 ; $i < sizeof($aInput) ; $i++) {
-          $aValues  = [$aInput[$i]];
-          for ($j = $i + 1 ; $j < sizeof($aInput) ; $j++) {
-              $aValues[]    = $aInput[$j];
-              $iSum = array_sum($aValues);
-              if ($iSum > $iValue) {
-                  break;
-              }
-              if ($iSum == $iValue) {
-                  $iReturn = array_sum([min($aValues), max($aValues)]);
-                  break 2;
+      $aInput[] = 0;
+      asort($aInput);
+      $aInput   = array_values($aInput);
+      $aPossibilies  = [];
+      $iPossibilities   = 1;
+      $aInput[sizeof($aInput)]    = 3 + $aInput[sizeof($aInput) - 1];
+      for ($iPosition = 0; $iPosition < sizeof($aInput); $iPosition++) {
+          $aPossibiliy= [];
+          for ($iPossibility = 1 ; $iPossibility <= 3 ; $iPossibility += 1) {
+              if (isset($aInput[$iPosition]) && in_array($aInput[$iPosition] + $iPossibility, $aInput)) {
+                  $aPossibiliy[] = $aInput[$iPosition] + $iPossibility;
               }
           }
+          if (sizeof($aPossibiliy) > 1) {
+              $aPossibilies[$aInput[$iPosition]]    = $aPossibiliy;
+              $iPossibilities   *= sizeof($aPossibiliy);
+          }
       }
-      return $iReturn;
+
+      $aPositions   = array_values($aPossibilies);
+      $aIndexs   = array_keys($aPossibilies);
+      var_dump($aPositions);;
+      var_dump($aIndexs);
+      exit();
+      foreach ($aPositions as $iPosition => $iNexts) {
+
+      }
+
+      //var_dump($aPossibilies);
+      var_dump($iPossibilities);
+      var_dump($aPossibilies);
+      self::render($aPossibilies);
+      var_dump(self::$count);
+      return self::$count;
+      exit();
+
+  }
+
+  private static function render($aPossibilities, $iPossibiity = 0, $aRender = []) {
+      $aRender[] = $iPossibiity;
+      if (isset($aPossibilities[$iPossibiity])) {
+          foreach ($aPossibilities[$iPossibiity] as $subPossibility) {
+              self::render($aPossibilities, $subPossibility, $aRender);
+          }
+      } else {
+          self::$count++;
+          if (0 == self::$count % 1000000) {
+              var_dump(self::$count);
+          }
+      }
   }
 }
