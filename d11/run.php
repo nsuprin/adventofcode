@@ -114,6 +114,8 @@ INPUT;
 
   private static $iOccupied = 0;
 
+  private static $sMode = 1;
+
   /**
    * RUN
    */
@@ -132,21 +134,8 @@ INPUT;
   }
 
   public static function test2() {
-      $aInput = explode("\n", <<< TEST
-16
-10
-15
-5
-1
-11
-7
-19
-6
-12
-4
-TEST
-      );
-      if (8 == (self::parse2($aInput))) {
+      $aInput = explode("\n", self::$sTest);
+      if (26 == (self::parse2($aInput))) {
           var_dump('OK');
       } else {
           var_dump('KO');
@@ -176,9 +165,10 @@ TEST
           if ($aProcessed[$sMd5] > 3) {
               $process  = false;
           }
-          self::render($aRoom);
+          //self::render($aRoom);
 
       } while ($process);
+      self::render($aRoom);
 
       return self::$iOccupied;
 
@@ -204,7 +194,11 @@ TEST
       self::$iOccupied  = 0;
       foreach ($aRoom as $x => $aRow) {
           foreach ($aRow as $y => $sSeat) {
-              $aNewRoom[$x][$y]    = self::getNewStatus($aRoom, $x, $y);
+              if (1 == self::$sMode) {
+                  $aNewRoom[$x][$y]    = self::getNewStatus($aRoom, $x, $y);
+              } else {
+                  $aNewRoom[$x][$y]    = self::getNewStatus2($aRoom, $x, $y);
+              }
               if (self::OCCUPIED == $aNewRoom[$x][$y]) {
                   self::$iOccupied++;
               }
@@ -212,7 +206,6 @@ TEST
       }
       return $aNewRoom;
   }
-
   public static function getNewStatus($aRoom, $srcX, $srcY) {
       $sCurrentSeat = $aRoom[$srcX][$srcY];
       $sReturn  = $sCurrentSeat;
@@ -245,13 +238,69 @@ TEST
       return $sReturn;
   }
 
+  public static function getNewStatus2($aRoom, $srcX, $srcY) {
+      $sCurrentSeat = $aRoom[$srcX][$srcY];
+      $sReturn  = $sCurrentSeat;
+      if (self::FLOOR != $sCurrentSeat) {
+          $aPlan    = [self::OCCUPIED => 0, self::ISEMPTY => 0, self::FLOOR => 0];
+          for ($deltaX =  - 1 ; $deltaX <= 1 ; $deltaX++) {
+              $x = $srcX + $deltaX;
+              if (!isset($aRoom[$x])) {
+                  continue;
+              }
+              for ($deltaY =  - 1 ; $deltaY <= 1 ; $deltaY++) {
+                  $y = $srcY + $deltaY;
+                  if (!isset($aRoom[$x][$y])) {
+                      continue;
+                  }
+                  if (0 == $deltaX && 0 == $deltaY) {
+                      continue;
+                  }
+                  //var_dump([$aRoom, $srcX, $srcY, $deltaX, $deltaY]);exit();
+                  $sStatus  = self::searchDirection($aRoom, $srcX, $srcY, $deltaX, $deltaY);
+                  $aPlan[$sStatus]++;
+              }
+          }
+          if (self::ISEMPTY == $sCurrentSeat) {
+              if (0 == $aPlan[self::OCCUPIED]) {
+                  $sReturn  = self::OCCUPIED;
+              }
+          } elseif (self::OCCUPIED == $sCurrentSeat) {
+              if ($aPlan[self::OCCUPIED] >= 5) {
+                  $sReturn  = self::ISEMPTY;
+              }
+          }
+      }
+      return $sReturn;
+  }
+
+  public static function searchDirection($aRoom, $iStartx, $iStartY, $iDeltaX, $iDeltaY) {
+      $x = $iStartx;
+      $y = $iStartY;
+      $sReturn  = self::FLOOR;
+      do {
+          $continue = true;
+          $x    += $iDeltaX;
+          $y    += $iDeltaY;
+          if (!isset($aRoom[$x][$y])) {
+              $continue = false;
+              continue;
+          }
+          if (in_array($aRoom[$x][$y], [self::OCCUPIED, self::ISEMPTY])) {
+              $sReturn  = $aRoom[$x][$y];
+              $continue = false;
+          }
+      } while ($continue);
+      return $sReturn;
+  }
+
   /**
    * @param $aInput
    * @return mixed
    */
   public static function parse2($aInput) {
-
-
+      self::$sMode  = 2;
+      return self::parse($aInput);
   }
 
 }
