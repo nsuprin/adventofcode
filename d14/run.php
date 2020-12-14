@@ -612,7 +612,13 @@ INPUT;
     }
 
   public static function test2() {
-      $aInput = explode("\n", self::$sTest);
+      $aInput = explode("\n", <<< TEST
+mask = 000000000000000000000000000000X1001X
+mem[42] = 100
+mask = 00000000000000000000000000000000X0XX
+mem[26] = 1
+TEST
+);
       if (208 == (self::parse2($aInput))) {
           var_dump('OK');
       } else {
@@ -629,19 +635,14 @@ INPUT;
       foreach ($aInput as $sLine) {
           if (preg_match('/^mask = (.+)$/', $sLine, $aMatches)) {
               list(,$sMask) = $aMatches;
-              $aMask    = [];
-              foreach (array_reverse(str_split($sMask), false) as $iKey => $item) {
-                  $aMask[pow(2, $iKey)] = $item;
-              };
-
+              $aMask    = str_split($sMask);
           } elseif (preg_match('/^mem\[(\d+)\] = (\d+)$/', $sLine, $aMatches)) {
               list(, $iMem, $iValue)    = $aMatches;
               $aValue   = [];
-              $aBinValue = array_reverse(str_split(sprintf("%'.036b", ($iValue))));
-              echo "\nValue:\t".(implode(array_reverse($aBinValue)))."\t(decimal ".bindec(implode(array_reverse($aBinValue))).")\n";
-              echo "Mask:\t".(implode(array_reverse($aMask)))."\n";
+              $aBinValue = str_split(sprintf("%'.036b", ($iValue)));
+              echo "\nValue:\t".implode($aBinValue)."\t(decimal ".bindec(implode($aBinValue)).")\n";
+              echo "Mask:\t".implode($aMask)."\n";
               foreach ($aBinValue as $iKey => $item) {
-                  $iKey = pow(2, $iKey);
                   switch ($aMask[$iKey]) {
                       case 'X':
                           $newitem  = $item;
@@ -655,17 +656,11 @@ INPUT;
                   }
                   $aValue[$iKey]    = $newitem;
               }
-              echo "Result:\t".(implode(array_reverse($aValue)))."\t(decimal ".bindec(implode(array_reverse($aValue))).")\n";
-              $aMemory[$iMem]   = $aValue;
+              echo "Result:\t".implode($aValue)."\t(decimal ".bindec(implode($aValue)).")\n";
+              $aMemory[$iMem]   = bindec(implode($aValue));;
           }
       }
-
-      $aMemoryDec = [];
-
-      foreach ($aMemory as $iKey => $item) {
-          $aMemoryDec[$iKey]    = bindec(implode(array_reverse($item)));
-      }
-      return array_sum($aMemoryDec);
+      return array_sum($aMemory);
   }
 
   /**
@@ -673,27 +668,55 @@ INPUT;
    * @return mixed
    */
   public static function parse2($aInput) {
-      list(, $sBuses) = $aInput;
-      $aBuses   = [];
-      foreach (explode(',', $sBuses) as $iDelta => $iBus) {
-          if ('x' == $iBus) {
-              continue;
+
+      $aMask    = [];
+      $aMemory  = [];
+      foreach ($aInput as $sLine) {
+          if (preg_match('/^mask = (.+)$/', $sLine, $aMatches)) {
+              list(,$sMask) = $aMatches;
+              $aMask    = str_split($sMask);
+          } elseif (preg_match('/^mem\[(\d+)\] = (\d+)$/', $sLine, $aMatches)) {
+              list(, $iMem, $iValue)    = $aMatches;
+              $aAdresse   = [];
+              $aPows      = [];
+              $aBinMem = str_split(sprintf("%'.036b", ($iMem)));
+              echo "\naddress:\t".implode($aBinMem)."\t(decimal ".bindec(implode($aBinMem)).")\n";
+              echo "mask:\t\t".implode($aMask)."\n";
+              foreach ($aBinMem as $iKey => $item) {
+                  switch ($aMask[$iKey]) {
+                      case 'X':
+                          $newitem  = '0';
+                          $aPows[]  = pow(2, abs($iKey - 35));
+                          break;
+                      case 0:
+                          $newitem = (int)$item;
+                          break;
+                      case 1:
+                          $newitem = 1;
+                          break;
+                  }
+                  $aAdresse[$iKey]    = $newitem;
+              }
+              echo "result:\t\t".implode($aAdresse)."\t(decimal ".bindec(implode($aAdresse)).")\n";
+              foreach (self::getAllAdresses(bindec(implode($aAdresse)), $aPows) as $iAddress) {
+                  $aMemory[$iAddress]    = $iValue;
+              }
           }
-          $aBuses[$iDelta]  = $iBus;
       }
+      return array_sum($aMemory);
+  }
 
-      $iStepSize    = array_values($aBuses)[0];
-
-      unset($aBuses[array_keys($aBuses)[0]]);
-      $iCurrentTimestamp    = 0;
-
-      foreach ($aBuses as $iDeltabus => $iBus) {
-          while (0 == ($iCurrentTimestamp + $iDeltabus) || 0 != ($iCurrentTimestamp + $iDeltabus) % $iBus) {
-              $iCurrentTimestamp    += $iStepSize;
+  private static function getAllAdresses($iAdresse, $aPows) {
+      $aAdresses    = [];
+      $iPow = array_shift($aPows);
+      foreach ([0, 1] as $item) {
+          $iAdresse = ($item * $iPow) + $iAdresse;
+          $aAdresses[$iAdresse] = $iAdresse;
+          if (sizeof($aPows) > 0) {
+              $aAdresses    += self::getAllAdresses($iAdresse, $aPows);
           }
-          $iStepSize    *= $iBus;
       }
-      return $iCurrentTimestamp;
+      return $aAdresses;
   }
 
 }
