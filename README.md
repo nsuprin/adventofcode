@@ -1,5 +1,5 @@
 # adventofcode
-https://adventofcode.com/2020
+https://adventofcode.com/2021
 
 ```bash
 ./run.php dx [test|run|test2|run2]
