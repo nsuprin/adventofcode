@@ -1,5 +1,5 @@
 <?php
-class D1
+class D01
 {
   private static $sInput = <<< INPUT
 1706
