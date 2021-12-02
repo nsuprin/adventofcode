@@ -1,7 +1,95 @@
 <?php
-class D02
+class D02 extends Day
 {
-  private static $sInput = <<< INPUT
+  /**
+   * @var int
+   */
+  private $ix = 0, $iY = 0, $iAim = 0;
+
+  /**
+   * @param $aInput
+   * @return float|int
+   */
+  public function parse($aInput) {
+    foreach ($aInput as $item) {
+        list($sMovement, $iDelta) = explode(' ', $item);
+        switch ($sMovement) {
+            case 'forward':
+                $this->ix += $iDelta;
+                break;
+            case 'down':
+                $this->iY += $iDelta;
+                break;
+            case 'up':
+                $this->iY -= $iDelta;
+                break;
+        }
+    }
+    $iReturn = $this->iY * $this->ix;
+    return $iReturn;
+  }
+
+  /**
+   * @param $aInput
+   * @return float|int
+   */
+  public function parse2($aInput) {
+      foreach ($aInput as $item) {
+          list($sMovement, $iDelta) = explode(' ', $item);
+          switch ($sMovement) {
+              case 'forward':
+                  $this->ix += $iDelta;
+                  $this->iY += $iDelta * $this->iAim;
+                  break;
+              case 'down':
+                  $this->iAim += $iDelta;
+                  break;
+              case 'up':
+                  $this->iAim -= $iDelta;
+                  break;
+          }
+      }
+      $iReturn = $this->iY * $this->ix;
+      return $iReturn;
+  }
+
+  /**
+   * @return int
+   */
+  protected function getExpectedTest()
+  {
+    return 150;
+  }
+
+  /**
+   * @return int
+   */
+  protected function getExpectedTest2()
+  {
+    return 900;
+  }
+
+  /**
+   * @return string
+   */
+  protected function getTestData()
+  {
+    return <<< TEST
+forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2
+TEST;
+  }
+
+  /**
+   * @return string
+   */
+  protected function getInputData()
+  {
+    return <<< INPUT
 forward 9
 forward 7
 forward 4
@@ -1003,106 +1091,5 @@ down 2
 down 7
 forward 1
 INPUT;
-
-  private static $sTest = <<< TEST
-forward 5
-down 5
-forward 8
-up 3
-down 8
-forward 2
-TEST;
-
-  private static $ix = 0, $iY = 0, $iAim = 0;
-
-  /**
-   * RUN
-   */
-  public static function run() {
-    $aInput = explode("\n", self::$sInput);
-    var_dump(self::parse($aInput));
-  }
-
-  /**
-   *
-   */
-  public static function run2() {
-    $aInput = explode("\n", self::$sInput);
-    var_dump(self::parse2($aInput));
-  }
-
-  /**
-   * TEST
-   */
-  public static function test() {
-    $aInput = explode("\n", self::$sTest);
-    $iResult = self::parse($aInput);
-    var_dump($iResult);
-    if (150 == $iResult) {
-      var_dump('OK');
-    } else {
-      var_dump('KO');
-    }
-  }
-
-  /**
-   * TEST
-   */
-  public static function test2() {
-    $aInput = explode("\n", self::$sTest);
-    $iResult = self::parse2($aInput);
-    if (900 == $iResult) {
-      var_dump('OK');
-    } else {
-      var_dump('KO');
-    }
-  }
-
-  /**
-   * @param $aInput
-   * @return float|int
-   */
-  public static function parse($aInput) {
-    foreach ($aInput as $item) {
-        list($sMovement, $iDelta) = explode(' ', $item);
-        switch ($sMovement) {
-            case 'forward':
-                self::$ix += $iDelta;
-                break;
-            case 'down':
-                self::$iY += $iDelta;
-                break;
-            case 'up':
-                self::$iY -= $iDelta;
-                break;
-        }
-    }
-    $iReturn = self::$iY * self::$ix;
-    return $iReturn;
-  }
-
-  /**
-   * @param $aInput
-   * @return float|int
-   */
-  public static function parse2($aInput) {
-      foreach ($aInput as $item) {
-          list($sMovement, $iDelta) = explode(' ', $item);
-          switch ($sMovement) {
-              case 'forward':
-                  self::$ix += $iDelta;
-                  self::$iY += $iDelta * self::$iAim;
-                  break;
-              case 'down':
-                  self::$iAim += $iDelta;
-                  break;
-              case 'up':
-                  self::$iAim -= $iDelta;
-                  break;
-          }
-      }
-      $iReturn = self::$iY * self::$ix;
-      return $iReturn;
   }
 }
-
