@@ -4,32 +4,31 @@
 class D03 extends Day
 {
 
-  private $aCount = [];
-
   /**
    * @inheritDoc
    */
   public function parse($aInput)
   {
+    $aCount = [];
     foreach ($aInput as $sLine) {
       for ($iPosition = 0 ; $iPosition < strlen($sLine) - 1 ; $iPosition++) {
-        if (!isset($this->aCount[$iPosition])) {
-          $this->aCount[$iPosition] = 0;
+        if (!isset($aCount[$iPosition])) {
+          $aCount[$iPosition] = 0;
         }
-        $this->aCount[$iPosition] += substr($sLine, $iPosition, 1);
+        $aCount[$iPosition] += substr($sLine, $iPosition, 1);
       }
     }
     $iMean = sizeof($aInput) / 2;
     $aGamma = $aEpsilon = [];
-    foreach ($this->aCount as $iPosition => $iCount) {
+    foreach ($aCount as $iPosition => $iCount) {
       $aGamma[$iPosition] = (int)($iCount > $iMean);
       $aEpsilon[$iPosition] = (int)(!$aGamma[$iPosition]);
     }
     $sGamma = implode($aGamma);
     $iGamma = bindec($sGamma);
+
     $sEpsilon = implode($aEpsilon);
     $iEpsilon = bindec($sEpsilon);
-    bindec($sEpsilon);
 
     return $iGamma * $iEpsilon;
   }
@@ -37,9 +36,95 @@ class D03 extends Day
   /**
    * @inheritDoc
    */
-  public function parse2($aInput)
+  public function parse2($aInput, $iPosition = 0, $sMode = null)
   {
-    // TODO: Implement parse2() method.
+    /*if (!isset($aInput[0])) {
+      var_dump($aInput);exit();
+    }*/
+    $iLength = strlen($aInput[0]);
+    /*if ($iPosition > $iLength) {
+      var_dump('stop');return;
+    }*/
+
+    /*if ("co2" == $sMode) {
+      var_dump([$iPosition, $aInput]);
+    }*/
+    if (sizeof($aInput) == 1) {
+      //var_dump(bindec($aInput[0]));
+      return bindec($aInput[0]);
+    }
+    $aCount = [];
+    foreach ($aInput as $sLine) {
+      $sChar = substr($sLine, $iPosition, 1);
+      if (!isset($aCount[$sChar])) {
+        $aCount[$sChar] = [];
+      }
+      $aCount[$sChar][] = trim($sLine);
+    }
+    $aSize = [];
+    foreach ($aCount as $sChar => $items) {
+      $aSize[$sChar]  = sizeof($items);
+    }
+    asort($aSize);
+    $aModeKeys = array_keys($aSize);
+    $aBind  = [
+      'o2' => 1,
+      'co2' => 0,
+    ];
+    $aMode = [];
+    if (1 == $aSize[0] && $aSize[0] == $aSize[1]) {
+      $aMode[$sMode]  = $aCount[$aBind[$sMode]];
+    } else {
+      foreach ($aBind as $sBindMode => $iBindMode) {
+        if (!isset($aModeKeys[$iBindMode])) {
+          continue;
+        }
+        if (!isset($aCount[$aModeKeys[$iBindMode]])) {
+          continue;
+        }
+        $aMode[$sBindMode] = $aCount[$aModeKeys[$iBindMode]];
+      }
+    }
+
+    /*if ("co2" == $sMode && $iPosition > 0) {
+      var_dump([$iPosition, $sMode, $aCount, $aMode]);
+    }*/
+    if (0 == $iPosition) {
+      $aReturn = [];
+      ++$iPosition;
+      foreach ($aMode as $sSubMode => $aItems) {
+        $aReturn[$sSubMode] = $this->parse2($aItems, $iPosition, $sSubMode);
+      }
+      list($o2, $co2) = array_values($aReturn);
+      return  $o2 * $co2;
+    } else {
+      return $this->parse2($aMode[$sMode], ++$iPosition, $sMode);
+    }
+  }
+
+
+  /**
+   * TEST
+   */
+  public function test2() {
+    $aInput = <<< INPUT
+11110
+10110
+10111
+10101
+11100
+10000
+11001
+INPUT;
+
+    /*$iResult = $this->parse2(explode("\n", $aInput), 1, 1);
+    return;*/
+    $iResult = $this->parse2($this->aTest);
+    if ($this->getExpectedTest2() == $iResult) {
+      var_dump('OK');
+    } else {
+      var_dump('KO');
+    }
   }
 
   /**
@@ -1087,6 +1172,6 @@ TEST;
    */
   protected function getExpectedTest2()
   {
-    // TODO: Implement getExpectedTest2() method.
+    return 230;
   }
 }
