@@ -9,10 +9,33 @@ class D04 extends Day
    */
   public function parse($aInput)
   {
+    $aTirage  = $this->getTirages($aInput);
+    $oGrilleCollection  = $this->getGrilleCollection($aInput);
+
+    // --- TAS
+    foreach ($aTirage as $iTirage) {
+      $iResult = $oGrilleCollection->findNumber($iTirage);
+      if (!empty($iResult)) {
+        return $iResult;
+      }
+    }
+  }
+
+  /**
+   * @param $aInput
+   */
+  private function getTirages(&$aInput) {
     // --- get tirages
     $aTirage = explode(',', array_shift($aInput));
     array_shift($aInput);
+    return $aTirage;
+  }
 
+  /**
+   * @param $aInput
+   * @return GrilleCollection
+   */
+  private function  getGrilleCollection(&$aInput) {
     // --- init grilles
     $oGrilleCollection  = new GrilleCollection();
     $aGrille  = [];
@@ -28,16 +51,7 @@ class D04 extends Day
       }
     }
     $oGrilleCollection->addGrille($aGrille);
-
-    //var_dump($aTirage);exit();
-    // --- TAS
-    foreach ($aTirage as $iTirage) {
-      $iResult = $oGrilleCollection->findNumber($iTirage);
-      if (!empty($iResult)) {
-        return $iResult;
-      }
-    }
-    //var_dump($oGrilleCollection);
+    return $oGrilleCollection;
   }
 
   /**
@@ -45,7 +59,16 @@ class D04 extends Day
    */
   public function parse2($aInput)
   {
-    // TODO: Implement parse2() method.
+    $aTirage  = $this->getTirages($aInput);
+    $oGrilleCollection  = $this->getGrilleCollection($aInput);
+
+    // --- TAS
+    foreach ($aTirage as $iTirage) {
+      $iResult = $oGrilleCollection->findNumber2($iTirage);
+      if (!empty($iResult)) {
+        return $iResult;
+      }
+    }
   }
 
   /**
@@ -797,6 +820,8 @@ class Grille {
  */
 class GrilleCollection {
 
+  private static $aWinGrille = [];
+
   /**
    * @var array
    */
@@ -821,6 +846,21 @@ class GrilleCollection {
       $iReturn = $oGrille->findNumber($iNumber);
       if (!empty($iReturn)) {
         return $iReturn;
+      }
+    }
+  }
+
+  public function findNumber2($iNumber) {
+    /**
+     * @var $oGrille Grille
+     */
+    foreach ($this->aGrilleCollection as $iGrille => $oGrille) {
+      $iTmp = $oGrille->findNumber($iNumber);
+      if (!empty($iTmp)) {
+        self::$aWinGrille[$iGrille] = $iTmp;
+        if (sizeof(self::$aWinGrille) == sizeof($this->aGrilleCollection)) {
+          return $iTmp;
+        }
       }
     }
   }
