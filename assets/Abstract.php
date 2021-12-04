@@ -13,6 +13,24 @@ abstract class Day {
   public function __construct() {
     $this->aInput = explode("\n", $this->getInputData());
     $this->aTest = explode("\n", $this->getTestData());
+    array_walk($this->aInput, [$this, 'array_rtrim']);
+    array_walk($this->aTest, [$this, 'array_rtrim']);
+  }
+
+  /**
+   * @param $item
+   * @param $key
+   */
+  protected function array_rtrim(&$item, $key) {
+    $item = rtrim($item);
+  }
+
+  /**
+   * @param $item
+   * @param $key
+   */
+  protected function array_trim(&$item, $key) {
+    $item = trim($item);
   }
 
   /**
