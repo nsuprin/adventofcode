@@ -588,6 +588,9 @@ class Segment {
   const X = 0;
   const Y = 1;
 
+  /**
+   * @var int
+   */
   protected $iOverlap = 0;
 
   /**
@@ -628,7 +631,7 @@ class Segment {
    */
   protected function drawSegmentY() {
     $iDelta = ($this->getBeginY() < $this->getEndY()) ? 1 : -1;
-    for ($y = $this->getBeginY() ; $y != $this->getEndY() + $iDelta ; $y = $y + $iDelta) {
+    for ($y = $this->getBeginY() ; $y != $this->getEndY() + $iDelta ; $y += $iDelta) {
       $this->drawPoint($this->getBeginX(), $y);
     }
   }
@@ -638,7 +641,7 @@ class Segment {
    */
   protected function drawSegmentX() {
     $iDelta = ($this->getBeginX() < $this->getEndX()) ? 1 : -1;
-    for ($x = $this->getBeginX() ; $x != $this->getEndX() + $iDelta ; $x = $x + $iDelta) {
+    for ($x = $this->getBeginX() ; $x != $this->getEndX() + $iDelta ; $x += $iDelta) {
       $this->drawPoint($x, $this->getBeginY());
     }
   }
@@ -710,11 +713,9 @@ class Segment2 extends Segment {
    * @return int
    */
   public function draw() {
-    if ($this->getBeginX() == $this->getEndX()) {
-      $this->drawSegmentY();
-    } elseif ($this->getBeginY() == $this->getEndY()) {
-      $this->drawSegmentX();
-    } elseif (abs($this->getBeginX() - $this->getEndX()) == abs($this->getBeginY() - $this->getEndY())) {
+    parent::draw();
+    // diagonal xy
+    if (abs($this->getBeginX() - $this->getEndX()) == abs($this->getBeginY() - $this->getEndY())) {
       $this->drawSegmentXY();
     }
     return $this->iOverlap;
@@ -727,7 +728,7 @@ class Segment2 extends Segment {
     $iDeltaX = ($this->getBeginX() < $this->getEndX()) ? 1 : -1;
     $iDeltaY = ($this->getBeginY() < $this->getEndY()) ? 1 : -1;
     $y = $this->getBeginY();
-    for ($x = $this->getBeginX() ; $x != $this->getEndX() + $iDeltaX ; $x = $x + $iDeltaX) {
+    for ($x = $this->getBeginX() ; $x != $this->getEndX() + $iDeltaX ; $x += $iDeltaX) {
       $this->drawPoint($x, $y);
       $y = $y + $iDeltaY;
     }
