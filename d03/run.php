@@ -11,7 +11,7 @@ class D03 extends Day
   {
     $aCount = [];
     foreach ($aInput as $sLine) {
-      for ($iPosition = 0 ; $iPosition < strlen($sLine) - 1 ; $iPosition++) {
+      for ($iPosition = 0 ; $iPosition < strlen($sLine) ; $iPosition++) {
         if (!isset($aCount[$iPosition])) {
           $aCount[$iPosition] = 0;
         }
