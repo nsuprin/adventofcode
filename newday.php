@@ -14,3 +14,5 @@ copy('assets/Sample.php', $sFile);
 $sContent = file_get_contents($sFile);
 $sContent = str_replace('Sample', ucfirst($day), $sContent);
 file_put_contents($sFile, $sContent);
+file_put_contents($day.DIRECTORY_SEPARATOR.'data.txt', '');
+file_put_contents($day.DIRECTORY_SEPARATOR.'test.txt', '');

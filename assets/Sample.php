@@ -23,14 +23,6 @@ class Sample extends Day
   /**
    * @inheritDoc
    */
-  protected function getTestData()
-  {
-    // TODO: Implement getTestData() method.
-  }
-
-  /**
-   * @inheritDoc
-   */
   protected function getExpectedTest()
   {
     // TODO: Implement getExpectedTest() method.
@@ -42,13 +34,5 @@ class Sample extends Day
   protected function getExpectedTest2()
   {
     // TODO: Implement getExpectedTest2() method.
-  }
-
-  /**
-   * @inheritDoc
-   */
-  protected function getInputData()
-  {
-    // TODO: Implement getInputData() method.
   }
 }

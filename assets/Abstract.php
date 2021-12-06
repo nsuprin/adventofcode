@@ -87,7 +87,37 @@ abstract class Day {
   /**
    * @return mixed
    */
-  abstract protected function getTestData();
+  protected final function getTestData() {
+    return $this->loadFIle('test.txt');
+  }
+
+  /**
+   * @return mixed
+   */
+  private final function getInputData() {
+    return $this->loadFIle('data.txt');
+  }
+
+  /**
+   * @return string
+   */
+  private function getDataDir() {
+    return realpath(__DIR__.'/..').DIRECTORY_SEPARATOR.strtolower(get_class($this));
+  }
+
+  /**
+   * @param $sFile
+   * @return false|string
+   * @throws Exception
+   */
+  private function loadFIle($sFile) {
+    $sFile  = $this->getDataDir().DIRECTORY_SEPARATOR.$sFile;
+    if (!is_file($sFile)) {
+      throw new Exception("file not found ".$sFile);
+    }
+    return file_get_contents($sFile);
+  }
+
   /**
    * @return mixed
    */
@@ -97,10 +127,5 @@ abstract class Day {
    * @return mixed
    */
   abstract protected function getExpectedTest2();
-  
-  /**
-   * @return mixed
-   */
-  abstract protected function getInputData();
 
 }
