@@ -8,23 +8,41 @@ class D06 extends Day
    */
   private $iNbDays  = 80;
 
+  private $aFishs = [];
+
   /**
    * @inheritDoc
    */
   public function parse($aInput)
   {
-    $aFishs  = explode(',', $aInput[0]);
-    for ($iDay = 1 ; $iDay <= $this->iNbDays ; $iDay++) {
-      $iFishSize = sizeof($aFishs);
-      for ($iFish = 0 ; $iFish <  $iFishSize; $iFish++) {
-        if (0 == $aFishs[$iFish]--) {
-          $aFishs[$iFish] = 6;
-          array_push($aFishs, 8);
-        }
-      }
-      //echo "After $iDay days : ".implode(',', $aFishs)."\n";
+    $aTmpFishs  = explode(',', $aInput[0]);
+    foreach ($aTmpFishs as $iFishPhase) {
+      $this->addFish($this->aFishs, $iFishPhase, 1);
     }
-    return sizeof($aFishs);
+    for ($iDay = 1 ; $iDay <= $this->iNbDays ; $iDay++) {
+      $aNewFish = [];
+      foreach ($this->aFishs as $iFishPhase => $iNb) {
+        if (0 == $iFishPhase) {
+          $this->addFish($aNewFish, 6, $iNb);
+          $this->addFish($aNewFish, 8, $iNb);
+          continue;
+        }
+        $this->addFish($aNewFish, $iFishPhase - 1, $iNb);
+      }
+      $this->aFishs = $aNewFish;
+    }
+    return array_sum($this->aFishs);
+  }
+
+  /**
+   * @param $iFishPhase
+   * @param $iNbFishes
+   */
+  private function addFish(&$aFish, $iFishPhase, $iNbFishes) {
+    if (!isset($aFish[$iFishPhase])) {
+      $aFish[$iFishPhase]  = 0;
+    }
+    $aFish[$iFishPhase]  += $iNbFishes;
   }
 
   /**
@@ -33,7 +51,7 @@ class D06 extends Day
   public function parse2($aInput)
   {
     $this->iNbDays  = 256;
-    $this->parse($aInput);
+    return $this->parse($aInput);
   }
 
   /**
