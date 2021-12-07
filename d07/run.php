@@ -15,11 +15,9 @@ class D07 extends Day
   {
     list($sCrabs)  = $aInput;
     $aCrabs  = explode(',', $sCrabs);
-    asort($aCrabs);
-    $aConsos = [];
     $aConsos = [];
     foreach ($aCrabs as $i => $aCrab) {
-      $aConsos[$i] = $this->getFuelConso($aCrabs, $i);
+      $aConsos[] = $this->getFuelConso($aCrabs, $i);
     }
     asort($aConsos);
     return array_values($aConsos)[0];
@@ -27,48 +25,15 @@ class D07 extends Day
 
   /**
    * @param $aCrabs
-   * @param $iMeanCrab
+   * @param $i
    * @return float|int
    */
-  private function getFuelConso($aCrabs, $iMeanCrab) {
+  private function getFuelConso($aCrabs, $i) {
     $iFuel  = 0;
     foreach ($aCrabs as $iCrab) {
-      $iFuelCrab = abs($iMeanCrab - $iCrab);
-      //echo "$iCrab to $iMeanCrab : $iFuelCrab\n";
-      $iFuel += $iFuelCrab;
+      $iFuel += abs($i - $iCrab);
     }
     return $iFuel;
-  }
-
-  /**
-   * @param $aCrabs
-   * @param $iMeanCrab
-   * @return float|int
-   */
-  private function getFuelConso2($aCrabs, $iMeanCrab) {
-    $iFuel  = 0;
-    foreach ($aCrabs as $iCrab) {
-      $iFuelCrab = abs($iMeanCrab - $iCrab);
-
-      //echo "$iCrab to $iMeanCrab : $iFuelCrab\n";
-      $iFuel += $this->getFuelMax($iFuelCrab);
-    }
-
-    return $iFuel;
-  }
-
-  /**
-   * @param $iFuel
-   */
-  private function getFuelMax($iFuel)
-  {
-    if (!isset($this->aFuelMax[$iFuel])) {
-      $this->aFuelMax[$iFuel] = 0;
-      for ($i = 1; $i <= $iFuel; $i++) {
-        $this->aFuelMax[$iFuel] += $i;
-      }
-    }
-    return $this->aFuelMax[$iFuel];
   }
 
   /**
@@ -78,13 +43,36 @@ class D07 extends Day
   {
     list($sCrabs)  = $aInput;
     $aCrabs  = explode(',', $sCrabs);
-    asort($aCrabs);
     $aConsos = [];
     foreach ($aCrabs as $i => $aCrab) {
-      $aConsos[$i] = $this->getFuelConso2($aCrabs, $i);
+      $aConsos[] = $this->getFuelConso2($aCrabs, $i);
     }
     asort($aConsos);
     return array_values($aConsos)[0];
+  }
+
+  /**
+   * @param $aCrabs
+   * @param $iMeanCrab
+   * @return float|int
+   */
+  private function getFuelConso2($aCrabs, $i) {
+    $iFuel  = 0;
+    foreach ($aCrabs as $iCrab) {
+      $iFuel += $this->getFuelMax(abs($i - $iCrab));
+    }
+    return $iFuel;
+  }
+
+  /**
+   * @param $iFuel
+   * @return float|int|mixed
+   */
+  private function getFuelMax($iFuel) {
+    if (!isset($this->aFuelMax[$iFuel])) {
+      $this->aFuelMax[$iFuel] = array_sum(range(1, $iFuel));
+    }
+    return $this->aFuelMax[$iFuel];
   }
 
   /**
