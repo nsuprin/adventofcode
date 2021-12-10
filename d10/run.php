@@ -24,16 +24,32 @@ class D10 extends Day
     '>' => 25137,
   ];
 
+  /***
+   * @var int[]
+   */
+  private $aReferentialPoint2 = [
+    ')' => 1,
+    ']' => 2,
+    '}' => 3,
+    '>' => 4,
+  ];
+
+  /**
+   * @var array
+   */
+  private $aIncompleteLines = [];
+
   /**
    * @inheritDoc
    */
   public function parse($aInput)
   {
     $iReturn = 0;
-    foreach ($aInput as $sLine) {
-      if (empty($sLine)) {
+    foreach ($aInput as $sInputLine) {
+      if (empty($sInputLine)) {
         continue;
       }
+      $sLine  = $sInputLine;
       $bReplace = true;
       $aPatterns = ['\{\}', '\(\)', '\[\]', '<>',];
       // gros nettoyage
@@ -51,6 +67,9 @@ class D10 extends Day
       if (isset($this->aReferentialPoint[$sReturn])) {
         $iReturn  += $this->aReferentialPoint[$sReturn];
       }
+      if (empty($sReturn)) {
+        $this->aIncompleteLines[$sInputLine] = $sLine;
+      }
     }
     return $iReturn;
   }
@@ -60,26 +79,12 @@ class D10 extends Day
    * @return mixed
    */
   private function parseSyntax($aLine) {
-    $aCharacters  = [
-      '(' => 0,
-      '[' => 0,
-      '{' => 0,
-      '<' => 0,
-    ];
     foreach ($aLine as $sCharacter) {
       if (in_array($sCharacter, $this->aReferentialSyntax)) {
-        $aCharacters[$sCharacter]++;
         $sLastOpenCharacter = $sCharacter;
       } elseif (in_array($sCharacter, array_keys($this->aReferentialSyntax))) {
         $sOpenCharacter = $this->aReferentialSyntax[$sCharacter];
         if ($sOpenCharacter != $sLastOpenCharacter) {
-
-          echo 'Expected '.$sLastOpenCharacter.', found : '.$sCharacter."\n";
-          return $sCharacter;
-        }
-        //var_dump($sOpenCharacter.' '.$sCharacter);
-        $aCharacters[$sOpenCharacter]--;
-        if ($aCharacters[$sOpenCharacter] < 0) {
           return $sCharacter;
         }
       }
@@ -100,12 +105,34 @@ class D10 extends Day
     ]);
   }
 
+  public function test2a() {
+    $this->parse2(['<{([{{}}[<[[[<>{}]]]>[]]']);
+  }
+
   /**
    * @inheritDoc
    */
   public function parse2($aInput)
   {
-    // TODO: Implement parse2() method.
+    $this->parse($aInput);
+    $aReferentiel = array_flip($this->aReferentialSyntax);
+    $aScores  = [];
+    foreach ($this->aIncompleteLines as $sLine) {
+      $aLine = str_split($sLine);
+      $aLine = array_reverse($aLine);
+      $iScore = 0;
+      $aDisplay = [];
+      foreach ($aLine as $item) {
+        $sChar = $aReferentiel[$item];
+        $aDisplay[] = $sChar;
+        $iScore *= 5;
+        $iScore += $this->aReferentialPoint2[$sChar];
+      }
+      $aScores[implode('', $aDisplay)]  = $iScore;
+    }
+    asort($aScores);
+    return array_values($aScores)[floor(sizeof($aScores) / 2)];
+    var_dump($aScores);
   }
 
   /**
@@ -121,6 +148,6 @@ class D10 extends Day
    */
   protected function getExpectedTest2()
   {
-    // TODO: Implement getExpectedTest2() method.
+    return 288957;
   }
 }
