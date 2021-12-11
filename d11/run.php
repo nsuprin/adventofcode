@@ -114,22 +114,23 @@ class Grid {
    */
   public function process() {
     $this->aFlashStep = [];
-    // --- increments
-    foreach ($this->aGrid as $y => $aLine) {
-      foreach ($aLine as $x => $iPower) {
-        $this->increments($y, $x);
-      }
+    $aMethods = [
+      'increments',
+      'flash',
+      'reset',
+    ];
+    foreach ($aMethods as $sMethod) {
+      $this->_run($sMethod);
     }
-    // --- flash !
+  }
+
+  /**
+   * @param $sMethod
+   */
+  private function _run($sMethod) {
     foreach ($this->aGrid as $y => $aLine) {
       foreach ($aLine as $x => $iPower) {
-        $this->flash($y, $x);
-      }
-    }
-    // --- clean !
-    foreach ($this->aGrid as $y => $aLine) {
-      foreach ($aLine as $x => $iPower) {
-        $this->reset($y, $x);
+        call_user_func_array([$this, $sMethod], [$y, $x]);
       }
     }
   }
