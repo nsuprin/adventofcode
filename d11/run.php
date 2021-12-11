@@ -19,7 +19,7 @@ class D11 extends Day
   }
 
   /**
-   *
+   * chuck testA
    */
   public function testa() {
     $this->iSteps = 3;
@@ -38,7 +38,14 @@ CONTENT
    */
   public function parse2($aInput)
   {
-    // TODO: Implement parse2() method.
+    $oGrid  = new Grid($aInput);
+    $iNbOctopus = $oGrid->getNbOctopus();
+    $iStep = 0;
+    do {
+      $iStep++;
+      $oGrid->process();
+    } while ($oGrid->getNbFlashesStep() <> $iNbOctopus);
+    return $iStep;
   }
 
   /**
@@ -54,7 +61,7 @@ CONTENT
    */
   protected function getExpectedTest2()
   {
-    // TODO: Implement getExpectedTest2() method.
+    return 195;
   }
 }
 
@@ -92,6 +99,17 @@ class Grid {
   }
 
   /**
+   * @return int
+   */
+  public function getNbOctopus() {
+    $iNb  = 0;
+    foreach ($this->aGrid as $aLine) {
+      $iNb  += sizeof($aLine);
+    }
+    return $iNb;
+  }
+
+  /**
    *
    */
   public function process() {
@@ -121,6 +139,13 @@ class Grid {
    */
   public function getFlashes() {
     return $this->iFlashes;
+  }
+
+  /**
+   * @return int
+   */
+  public function getNbFlashesStep() {
+    return sizeof($this->aFlashStep);
   }
 
   /**
